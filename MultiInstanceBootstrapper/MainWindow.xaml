@@ -24,7 +24,9 @@
         <!-- Header -->
         <Border Grid.Row="0" Background="#16213E" CornerRadius="0,0,12,12" Padding="24,16">
             <DockPanel>
-                <Image DockPanel.Dock="Left" Source="https://upload.wikimedia.org/wikipedia/en/thumb/8/87/Roblox_logo.svg/200px-Roblox_logo.svg.png" Width="40" Height="40" />
+                <Border DockPanel.Dock="Left" Width="44" Height="44" CornerRadius="10" Background="#E94560">
+                    <TextBlock Text="RB" Foreground="#FFFFFF" FontFamily="Segoe UI" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
                 <StackPanel DockPanel.Dock="Left" Margin="12,0,0,0">
                     <TextBlock Text="MultiInstance Bootstrapper" Foreground="#FFFFFF" FontFamily="Segoe UI" FontWeight="Bold" FontSize="20" />
                     <TextBlock Text="{Binding VersionText}" Foreground="#A0A0B0" FontFamily="Segoe UI" FontSize="12" />
@@ -58,7 +60,7 @@
                             <Border.Clip>
                                 <EllipseGeometry Center="40,40" RadiusX="40" RadiusY="40" />
                             </Border.Clip>
-                            <Image Source="{Binding AvatarUrl}" Stretch="UniformToFill" />
+                            <TextBlock Text="{Binding AvatarInitial}" Foreground="#FFFFFF" FontFamily="Segoe UI" FontWeight="Bold" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <StackPanel Grid.Column="1" Margin="20,0,0,0">
                             <TextBlock Text="{Binding DisplayName}" Foreground="#FFFFFF" FontFamily="Segoe UI" FontWeight="Bold" FontSize="20" />

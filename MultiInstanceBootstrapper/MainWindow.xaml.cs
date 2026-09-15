@@ -20,7 +20,6 @@ public class MainWindowViewModel : INotifyPropertyChanged
     private readonly UpdateService _updateService;
     private readonly RobloxService _robloxService;
     private string _displayName = "Loading...";
-    private string _avatarUrl = "https://images.roblox.com/headshot?userId=0";
     private string _activeCountText = "0/3";
     private string _versionText = "Version 1.2.0";
     private string _statusText = "Ready";
@@ -29,13 +28,13 @@ public class MainWindowViewModel : INotifyPropertyChanged
 
     public ObservableCollection<RobloxInstanceViewModel> Instances { get; set; } = new();
 
-    public string DisplayName { get => _displayName; set { _displayName = value; OnPropertyChanged(); } }
-    public string AvatarUrl { get => _avatarUrl; set { _avatarUrl = value; OnPropertyChanged(); } }
+    public string DisplayName { get => _displayName; set { _displayName = value; OnPropertyChanged(); OnPropertyChanged(nameof(AvatarInitial)); } }
+    public string AvatarInitial => string.IsNullOrEmpty(DisplayName) ? "?" : DisplayName.Trim().Substring(0, 1).ToUpperInvariant();
     public string ActiveCountText { get => _activeCountText; set { _activeCountText = value; OnPropertyChanged(); } }
     public string VersionText { get => _versionText; set { _versionText = value; OnPropertyChanged(); } }
-    public string StatusText { get => _statusText; set { _statusText = value; OnPropertyChanged(); } }
-    public string UpdateStatusText { get => _updateStatusText; set { _updateStatusText = value; OnPropertyChanged(); } }
-    public string EmptyMessage { get => _emptyMessage; set { _emptyMessage = value; OnPropertyChanged(); } }
+    public string StatusText { get => _statusText; set { SetThreadSafe(() => _statusText = value, nameof(StatusText)); } }
+    public string UpdateStatusText { get => _updateStatusText; set { SetThreadSafe(() => _updateStatusText = value, nameof(UpdateStatusText)); } }
+    public string EmptyMessage { get => _emptyMessage; set { SetThreadSafe(() => _emptyMessage = value, nameof(EmptyMessage)); } }
 
     public ICommand LaunchCommand { get; }
     public ICommand KillAllCommand { get; }
@@ -182,7 +181,17 @@ public class MainWindowViewModel : INotifyPropertyChanged
     private void StartUpdateChecker()
     {
         var timer = new System.Timers.Timer(Constants.UpdateCheckIntervalMs);
-        timer.Elapsed += async (s, e) => await CheckForUpdates();
+        timer.Elapsed += async (s, e) =>
+        {
+            if (Application.Current?.Dispatcher.CheckAccess() == true)
+            {
+                await CheckForUpdates();
+            }
+            else
+            {
+                await Application.Current.Dispatcher.InvokeAsync(async () => await CheckForUpdates());
+            }
+        };
         timer.AutoReset = true;
         timer.Enabled = true;
     }
@@ -190,6 +199,30 @@ public class MainWindowViewModel : INotifyPropertyChanged
     public event PropertyChangedEventHandler? PropertyChanged;
     protected void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    private void SetThreadSafe(Action setter, string propertyName)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher == null)
+        {
+            setter();
+            OnPropertyChanged(propertyName);
+            return;
+        }
+        if (dispatcher.CheckAccess())
+        {
+            setter();
+            OnPropertyChanged(propertyName);
+        }
+        else
+        {
+            dispatcher.Invoke(() =>
+            {
+                setter();
+                OnPropertyChanged(propertyName);
+            });
+        }
+    }
 }
 
 public class RobloxInstanceViewModel : INotifyPropertyChanged
