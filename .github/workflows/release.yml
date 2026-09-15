@@ -1,0 +1,73 @@
+# Roblox MultiInstance Bootstrapper - Automated Release Pipeline
+
+name: Roblox MultiInstance Bootstrapper
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET SDK
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Restore Dependencies
+      run: dotnet restore MultiInstanceBootstrapper.sln
+
+    - name: Build Main Application
+      run: dotnet build MultiInstanceBootstrapper/MultiInstanceBootstrapper.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true
+
+    - name: Build Updater
+      run: dotnet build updater/MultiInstanceUpdater.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true
+
+    - name: Package Release
+      run: |
+        $publishDir = "MultiInstanceBootstrapper/bin/Release/net10.0-windows/win-x64/publish"
+        $updaterDir = "updater/bin/Release/net10.0/win-x64/publish"
+        
+        New-Item -ItemType Directory -Path "release" -Force | Out-Null
+        Copy-Item "$publishDir/MultiInstanceBootstrapper.exe" "release/MultiInstanceBootstrapper.exe" -Force
+        Copy-Item "$updaterDir/MultiInstanceUpdater.exe" "release/MultiInstanceUpdater.exe" -Force
+        Copy-Item "README.md" "release/README.md" -Force
+        
+        Compress-Archive -Path "release/*" -DestinationPath "MultiInstanceBootstrapper.zip"
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: MultiInstanceBootstrapper.zip
+        body: |
+          ## MultiInstance Bootstrapper v${{ github.ref_name }}
+          
+          ### Features
+          - Multiple Roblox instances (up to 3)
+          - Auto-update system
+          - Sleek dark theme UI
+          - Instance management
+          
+          ### How to Run
+          1. Download `MultiInstanceBootstrapper.zip`
+          2. Extract and run `MultiInstanceBootstrapper.exe`
+          3. Launch up to 3 Roblox instances
+          
+          ### Changelog
+          ${{ github.event.head_commit.message }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Notify
+      run: echo "Release complete!"
