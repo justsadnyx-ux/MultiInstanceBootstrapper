@@ -6,7 +6,7 @@
     <UseWPF>true</UseWPF>
     <ApplicationTitle>MultiInstance Bootstrapper</ApplicationTitle>
     <AssemblyName>MultiInstanceBootstrapper</AssemblyName>
-    <Version>1.2.0</Version>
+    <Version>1.2.2</Version>
     <Authors>MultiInstanceBootstrapper</Authors>
     <Description>A multi-instance Roblox bootstrapper with auto-updates.</Description>
     <PublishSingleFile>true</PublishSingleFile>

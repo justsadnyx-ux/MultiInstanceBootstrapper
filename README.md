@@ -2,7 +2,7 @@
 
 A sleek, dark-themed multi-instance Roblox bootstrapper that allows you to run up to 3 Roblox instances simultaneously with auto-update support.
 
-![GitHub Release](https://img.shields.io/badge/version-1.2.0-blue)
+![GitHub Release](https://img.shields.io/badge/version-1.2.2-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)
 
@@ -26,15 +26,15 @@ A sleek, dark-themed multi-instance Roblox bootstrapper that allows you to run u
 ## How to Run
 
 ### Download Release
-1. Go to the [Releases](https://github.com/YourUsername/MultiInstanceBootstrapper/releases) page
+1. Go to the [Releases](https://github.com/justsadnyx-ux/MultiInstanceBootstrapper/releases) page
 2. Download the latest `MultiInstanceBootstrapper.zip`
-3. Extract the ZIP file
-4. Run `MultiInstanceBootstrapper.exe`
+3. Extract the ZIP file (you will get a `MultiInstanceBootstrapper` folder)
+4. Run `MultiInstanceBootstrapper.exe` **from inside that folder** (do not move the exe alone — it needs the DLLs next to it)
 
 ### Build from Source
 ```bash
 # Clone the repository
-git clone https://github.com/YourUsername/MultiInstanceBootstrapper.git
+git clone https://github.com/justsadnyx-ux/MultiInstanceBootstrapper.git
 cd MultiInstanceBootstrapper
 
 # Build the solution
@@ -43,8 +43,8 @@ dotnet build MultiInstanceBootstrapper.sln
 # Run the bootstrapper
 dotnet run --project MultiInstanceBootstrapper/MultiInstanceBootstrapper.csproj
 
-# Build self-contained release
-dotnet publish MultiInstanceBootstrapper/MultiInstanceBootstrapper.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true
+# Build a self-contained folder release
+dotnet publish MultiInstanceBootstrapper/MultiInstanceBootstrapper.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=false
 ```
 
 ## Usage
@@ -68,14 +68,14 @@ dotnet publish MultiInstanceBootstrapper/MultiInstanceBootstrapper.csproj -c Rel
 - Checks GitHub Releases API every 5 minutes for updates
 - Downloads the latest release silently in the background
 - Notifies you when an update is available
-- All update logic is built directly into the single executable (no separate updater needed)
+- All update logic is built directly into the executable (no separate updater needed)
 - The app launches a small hidden helper that replaces the old exe and restarts automatically
 
 ## Project Structure
 
 ```
 MultiInstanceBootstrapper/
-├── MultiInstanceBootstrapper/          # Main application (single self-updating exe)
+├── MultiInstanceBootstrapper/          # Main application (self-updating exe + DLLs)
 │   ├── MainWindow.xaml                 # Main UI (dark theme)
 │   ├── MainWindow.xaml.cs             # UI logic
 │   ├── App.xaml                       # Application entry

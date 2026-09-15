@@ -14,6 +14,38 @@ using MultiInstanceBootstrapper.Helpers;
 
 namespace MultiInstanceBootstrapper;
 
+public partial class MainWindow : Window
+{
+    public MainWindow()
+    {
+        // Force a dark, guaranteed-visible background before any binding can fail.
+        Background = new SolidColorBrush(Color.FromRgb(13, 13, 13));
+
+        InitializeComponent();
+
+        try
+        {
+            DataContext = new MainWindowViewModel();
+        }
+        catch (Exception ex)
+        {
+            App.LogStartupError(ex, "MainWindow constructor");
+            DataContext = new FallbackViewModel();
+        }
+    }
+}
+
+public class FallbackViewModel
+{
+    public string VersionText => $"Version {Constants.AppVersion}";
+    public string DisplayName => "Roblox User";
+    public string AvatarInitial => "R";
+    public string ActiveCountText => "0/3";
+    public string StatusText => "Ready";
+    public string UpdateStatusText => "";
+    public string EmptyMessage => "No instances running.";
+}
+
 public class MainWindowViewModel : INotifyPropertyChanged
 {
     private readonly InstanceService _instanceService;
@@ -21,7 +53,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
     private readonly RobloxService _robloxService;
     private string _displayName = "Loading...";
     private string _activeCountText = "0/3";
-    private string _versionText = "Version 1.2.1";
+    private string _versionText = "Version 1.2.2";
     private string _statusText = "Ready";
     private string _updateStatusText = "";
     private string _emptyMessage = "No instances running. Click Launch Instance to get started.";
@@ -187,7 +219,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
             {
                 await CheckForUpdates();
             }
-            else
+            else if (Application.Current != null)
             {
                 await Application.Current.Dispatcher.InvokeAsync(async () => await CheckForUpdates());
             }

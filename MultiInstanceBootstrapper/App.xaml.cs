@@ -16,6 +16,12 @@ public partial class App : Application
         // with broken/remote/virtual GPU drivers, leaving the WPF client area blank white.
         RenderOptions.ProcessRenderMode = RenderMode.SoftwareOnly;
 
+        DispatcherUnhandledException += (s, e) =>
+        {
+            LogStartupError(e.Exception, "DispatcherUnhandledException");
+            e.Handled = true;
+        };
+
         try
         {
             var mainWindow = new MainWindow();
@@ -23,13 +29,18 @@ public partial class App : Application
         }
         catch (Exception ex)
         {
-            try
-            {
-                File.WriteAllText(Path.Combine(Path.GetTempPath(), "MIB_error.log"),
-                    $"{DateTime.Now}: {ex}\n\nInner: {ex.InnerException}");
-            }
-            catch { }
+            LogStartupError(ex, "OnStartup");
             throw;
         }
+    }
+
+    public static void LogStartupError(Exception ex, string stage)
+    {
+        try
+        {
+            File.AppendAllText(Path.Combine(Path.GetTempPath(), "MIB_error.log"),
+                $"{DateTime.Now} [{stage}]: {ex}\n\nInner: {ex.InnerException}\n\n---\n");
+        }
+        catch { }
     }
 }

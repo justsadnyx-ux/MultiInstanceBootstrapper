@@ -5,15 +5,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="MultiInstance Bootstrapper v1.2.1"
+        Title="MultiInstance Bootstrapper v1.2.2"
         Width="1100" Height="780"
         MinWidth="900" MinHeight="680"
         Background="#0D0D0D"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResizeWithGrip">
-    <Window.DataContext>
-        <local:MainWindowViewModel />
-    </Window.DataContext>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
