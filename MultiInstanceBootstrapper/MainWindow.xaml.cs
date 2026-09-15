@@ -21,7 +21,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
     private readonly RobloxService _robloxService;
     private string _displayName = "Loading...";
     private string _activeCountText = "0/3";
-    private string _versionText = "Version 1.2.0";
+    private string _versionText = "Version 1.2.1";
     private string _statusText = "Ready";
     private string _updateStatusText = "";
     private string _emptyMessage = "No instances running. Click Launch Instance to get started.";
