@@ -130,13 +130,23 @@ public class MainWindowViewModel : INotifyPropertyChanged
             if (update.HasUpdate)
             {
                 UpdateStatusText = $"Update v{update.Version} available!";
-                var result = MessageBox.Show($"Update v{update.Version} is available!\n\nDownload now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
+                var result = MessageBox.Show($"Update v{update.Version} is available!\n\nDownload and install now?", "Update Available", MessageBoxButton.YesNo, MessageBoxImage.Information);
                 if (result == MessageBoxResult.Yes)
                 {
-                    var path = await _updateService.DownloadLatestReleaseAsync();
-                    if (path != null)
+                    var newExe = await _updateService.DownloadLatestReleaseAsync();
+                    if (newExe != null)
                     {
-                        UpdateStatusText = "Update downloaded! Restart to apply.";
+                        UpdateStatusText = "Installing update...";
+                        if (_updateService.ApplyUpdate(newExe))
+                        {
+                            UpdateStatusText = "Update applied. Restarting...";
+                            // Shut down; the helper script replaces the exe and restarts.
+                            Application.Current.Shutdown();
+                        }
+                        else
+                        {
+                            UpdateStatusText = "Update installation failed.";
+                        }
                     }
                     else
                     {

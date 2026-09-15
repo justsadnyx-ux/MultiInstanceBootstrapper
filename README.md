@@ -68,13 +68,14 @@ dotnet publish MultiInstanceBootstrapper/MultiInstanceBootstrapper.csproj -c Rel
 - Checks GitHub Releases API every 5 minutes for updates
 - Downloads the latest release silently in the background
 - Notifies you when an update is available
-- The updater process handles the file replacement
+- All update logic is built directly into the single executable (no separate updater needed)
+- The app launches a small hidden helper that replaces the old exe and restarts automatically
 
 ## Project Structure
 
 ```
 MultiInstanceBootstrapper/
-├── MultiInstanceBootstrapper/          # Main application
+├── MultiInstanceBootstrapper/          # Main application (single self-updating exe)
 │   ├── MainWindow.xaml                 # Main UI (dark theme)
 │   ├── MainWindow.xaml.cs             # UI logic
 │   ├── App.xaml                       # Application entry
@@ -83,15 +84,12 @@ MultiInstanceBootstrapper/
 │   ├── Services/
 │   │   ├── RobloxService.cs           # Roblox detection & launch
 │   │   ├── InstanceService.cs         # Instance management
-│   │   └── UpdateService.cs           # Auto-update logic
+│   │   └── UpdateService.cs           # Auto-update & self-replace logic
 │   ├── Helpers/
 │   │   ├── Constants.cs              # App constants
 │   │   └── BoolToVisibilityConverter.cs
 │   └── Resources/
 │       └── Styles.xaml               # Dark theme styles
-├── updater/                           # Auto-updater
-│   ├── Program.cs                     # Updater program
-│   └── MultiInstanceUpdater.csproj
 ├── .github/
 │   └── workflows/
 │       └── release.yml               # GitHub Actions release

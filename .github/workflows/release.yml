@@ -24,20 +24,15 @@ jobs:
     - name: Restore Dependencies
       run: dotnet restore MultiInstanceBootstrapper.sln
 
-    - name: Build Main Application
-      run: dotnet build MultiInstanceBootstrapper/MultiInstanceBootstrapper.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true
-
-    - name: Build Updater
-      run: dotnet build updater/MultiInstanceUpdater.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true
+    - name: Publish Main Application
+      run: dotnet publish MultiInstanceBootstrapper/MultiInstanceBootstrapper.csproj -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true /p:IncludeAllContentForSelfExtract=true
 
     - name: Package Release
       run: |
         $publishDir = "MultiInstanceBootstrapper/bin/Release/net10.0-windows/win-x64/publish"
-        $updaterDir = "updater/bin/Release/net10.0/win-x64/publish"
         
         New-Item -ItemType Directory -Path "release" -Force | Out-Null
         Copy-Item "$publishDir/MultiInstanceBootstrapper.exe" "release/MultiInstanceBootstrapper.exe" -Force
-        Copy-Item "$updaterDir/MultiInstanceUpdater.exe" "release/MultiInstanceUpdater.exe" -Force
         Copy-Item "README.md" "release/README.md" -Force
         
         Compress-Archive -Path "release/*" -DestinationPath "MultiInstanceBootstrapper.zip"
