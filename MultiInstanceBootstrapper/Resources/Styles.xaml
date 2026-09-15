@@ -29,15 +29,6 @@
     <Style x:Key="MainWindowStyle" TargetType="Window">
         <Setter Property="Background" Value="{StaticResource BackgroundBrush}" />
         <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
-        <Setter Property="WindowStyle">
-            <Setter.Value>
-                <Style.Triggers>
-                    <Trigger Property="WindowState" Value="Maximized">
-                        <Setter Property="WindowStyle" Value="None" />
-                    </Trigger>
-                </Style.Triggers>
-            </Setter.Value>
-        </Setter>
         <Setter Property="FontFamily" Value="Segoe UI" />
     </Style>
 
@@ -158,7 +149,7 @@
     <Style x:Key="StatusText" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="Segoe UI" />
         <Setter Property="FontSize" Value="12" />
-        <Setter Property="FontWeight" FontWeight="Bold" />
+        <Setter Property="FontWeight" Value="Bold" />
     </Style>
 
     <ControlTemplate x:Key="AvatarTemplate" TargetType="Button">

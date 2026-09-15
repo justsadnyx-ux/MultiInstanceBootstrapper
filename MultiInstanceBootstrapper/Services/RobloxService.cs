@@ -1,4 +1,6 @@
+using System;
 using System.Diagnostics;
+using System.IO;
 using MultiInstanceBootstrapper.Helpers;
 using MultiInstanceBootstrapper.Models;
 using Microsoft.Win32;

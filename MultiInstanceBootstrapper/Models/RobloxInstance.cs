@@ -1,3 +1,6 @@
+using System;
+using System.Diagnostics;
+
 namespace MultiInstanceBootstrapper.Models;
 
 public enum InstanceStatus

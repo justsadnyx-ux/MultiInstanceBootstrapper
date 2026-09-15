@@ -10,8 +10,8 @@
     <Authors>MultiInstanceBootstrapper</Authors>
     <Description>A multi-instance Roblox bootstrapper with auto-updates.</Description>
     <PublishSingleFile>true</PublishSingleFile>
-    <IncludeAllContentForSelfExtract>trueIncludeAllContentForSelfExtract>
-    <IncludeNativeLibrariesForSelfExtract>trueIncludeNativeLibrariesForSelfExtract>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Octokit" Version="8.0.0" />

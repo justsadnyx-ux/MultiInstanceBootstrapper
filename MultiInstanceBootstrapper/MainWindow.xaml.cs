@@ -1,8 +1,11 @@
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using MultiInstanceBootstrapper.Models;
@@ -44,7 +47,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
         _updateService = new UpdateService(Constants.AppVersion);
         _robloxService = new RobloxService();
 
-        LaunchCommand = new RelayCommand(async _ => await LaunchInstance(), _ => _instanceService.CanLaunchInstance());
+        LaunchCommand = new RelayCommand(async _ => await LaunchInstanceAsync(), _ => _instanceService.CanLaunchInstance());
         KillAllCommand = new RelayCommand(_ => KillAllInstances(), _ => Instances.Count > 0);
         CheckUpdateCommand = new RelayCommand(async _ => await CheckForUpdates());
 
@@ -53,7 +56,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
         StartUpdateChecker();
     }
 
-    private async void LoadUserProfile()
+    private void LoadUserProfile()
     {
         try
         {
@@ -74,13 +77,14 @@ public class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
-    private async System.Threading.Tasks.Task LaunchInstance()
+    private async Task LaunchInstanceAsync()
     {
         StatusText = "Launching instance...";
         var instance = await _instanceService.LaunchInstanceAsync();
         if (instance != null)
         {
-            var vm = new RobloxInstanceViewModel(instance);
+            RobloxInstanceViewModel vm = null!;
+            vm = new RobloxInstanceViewModel(instance, _ => KillInstance(vm));
             Instances.Add(vm);
             UpdateCounts();
             UpdateEmptyMessage();
@@ -90,6 +94,18 @@ public class MainWindowViewModel : INotifyPropertyChanged
         {
             StatusText = "Failed to launch instance.";
         }
+        ((RelayCommand)LaunchCommand).RaiseCanExecuteChanged();
+        ((RelayCommand)KillAllCommand).RaiseCanExecuteChanged();
+    }
+
+    private void KillInstance(RobloxInstanceViewModel vm)
+    {
+        _instanceService.KillInstance(vm.RobloxInstance.Id);
+        vm.UpdateStatus(InstanceStatus.Stopped);
+        Instances.Remove(vm);
+        UpdateCounts();
+        UpdateEmptyMessage();
+        StatusText = $"Instance {vm.RobloxInstance.Id} killed.";
         ((RelayCommand)LaunchCommand).RaiseCanExecuteChanged();
         ((RelayCommand)KillAllCommand).RaiseCanExecuteChanged();
     }
@@ -120,8 +136,7 @@ public class MainWindowViewModel : INotifyPropertyChanged
                     var path = await _updateService.DownloadLatestReleaseAsync();
                     if (path != null)
                     {
-                        UpdateStatusText = "Update downloaded! Restarting...";
-                        // Would restart here
+                        UpdateStatusText = "Update downloaded! Restart to apply.";
                     }
                     else
                     {
@@ -170,19 +185,21 @@ public class MainWindowViewModel : INotifyPropertyChanged
 public class RobloxInstanceViewModel : INotifyPropertyChanged
 {
     private readonly RobloxInstance _instance;
-    private string _statusText;
-    private string _buttonText;
-    private string _detailText;
-    private string _statusColor;
+    private readonly Action<RobloxInstanceViewModel> _onKill;
+    private string _statusText = "Stopped";
+    private string _buttonText = "Launch";
+    private string _detailText = "";
 
-    public RobloxInstanceViewModel(RobloxInstance instance)
+    public RobloxInstanceViewModel(RobloxInstance instance, Action<RobloxInstanceViewModel> onKill)
     {
         _instance = instance;
-        UpdateDisplay();
+        _onKill = onKill;
+        _detailText = instance.LaunchArgs;
     }
 
     public string Name => _instance.Name;
-    public string LaunchArgs => _instance.LaunchArgs;
+    public RobloxInstance RobloxInstance => _instance;
+    public InstanceStatus Status => _instance.Status;
 
     public string StatusText
     {
@@ -202,12 +219,6 @@ public class RobloxInstanceViewModel : INotifyPropertyChanged
         set { _detailText = value; OnPropertyChanged(); }
     }
 
-    public string StatusColor
-    {
-        get => _statusColor;
-        set { _statusColor = value; OnPropertyChanged(); }
-    }
-
     public SolidColorBrush StatusBrush
     {
         get
@@ -222,20 +233,15 @@ public class RobloxInstanceViewModel : INotifyPropertyChanged
     public void UpdateStatus(InstanceStatus status)
     {
         _instance.Status = status;
-        UpdateDisplay();
-    }
-
-    private void UpdateDisplay()
-    {
-        StatusText = _instance.Status == InstanceStatus.Running ? "Running" : _instance.Status == InstanceStatus.Starting ? "Starting..." : "Stopped";
-        ButtonText = _instance.Status == InstanceStatus.Running ? "Kill" : "Launch";
-        DetailText = _instance.Status == InstanceStatus.Running ? $"Running since {_instance.StartedAt:HH:mm:ss}" : _instance.LaunchArgs;
-        StatusColor = _instance.Status == InstanceStatus.Running ? "#00C853" : _instance.Status == InstanceStatus.Starting ? "#FFC107" : "#A0A0B0";
+        StatusText = status == InstanceStatus.Running ? "Running" : status == InstanceStatus.Starting ? "Starting..." : "Stopped";
+        ButtonText = status == InstanceStatus.Running ? "Kill" : "Launch";
+        DetailText = status == InstanceStatus.Running ? $"Running since {_instance.StartedAt:HH:mm:ss}" : _instance.LaunchArgs;
+        OnPropertyChanged(nameof(StatusBrush));
     }
 
     private void Kill()
     {
-        // Handled by parent
+        _onKill?.Invoke(this);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
